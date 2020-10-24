@@ -37,7 +37,7 @@ export DOCKER_INSTALL=0
 echo -e "${INFO_LINE} Turn off swap and remove from /etc/fstab ${END_LINE}"
 swapoff -a || echo -e "${WARN_LINE} Problem to turn off swap ${END_LINE}"
 
-sed -i '/swap/d' /etc/fstab || echo -e "${WARN_LINE} Problem to remove swap from /etc/ftab ${END_LINE}"
+sed -i '/swap/d' /etc/fstab || echo -e "${WARN_LINE} Problem to remove swap from /etc/fstab ${END_LINE}"
 
 echo -e "${INFO_LINE} Check if module br_netfilter is enabled. ${END_LINE}"
 if [ `lsmod | grep br_netfilter | wc -l` -eq 0 ]; then
@@ -102,4 +102,5 @@ echo -e "~> ${END_LINE}kubeadm init"
 echo
 echo -e "${COLOR_LINE}If you want to ensure that the installation doesn't get some update accidentally running the below command: 
 ~> ${END_LINE}apt-mark hold kubelet kubeadm kubectl"
+echo
 
