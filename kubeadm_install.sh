@@ -34,6 +34,8 @@ apt-get install -y docker-ce docker-ce-cli containerd.io
 export DOCKER_INSTALL=0
 }
 
+echo -e "${INFO_LINE} It will install the lastest version KubeAdm, kubelet and kubectl from APT: https://apt.kubernetes.io/ or TDB ${END_LINE}"
+
 echo -e "${INFO_LINE} Turn off swap and remove from /etc/fstab ${END_LINE}"
 swapoff -a || echo -e "${WARN_LINE} Problem to turn off swap ${END_LINE}"
 
