@@ -4,6 +4,7 @@ export INFO_LINE='\e[1;32;47m[INFO]\e[0m\e[0;33m -'
 export COLOR_LINE='\e[1;33m'
 export WARN_LINE='\e[5;31;47m[WARN]\e[0m\e[0;31m -'
 export OPT="I"
+export K_VERSION="latest"
 export DOCKER_INSTALL=1
 
 if [ "${USER}" != "root" ]; then
@@ -34,7 +35,10 @@ apt-get install -y docker-ce docker-ce-cli containerd.io
 export DOCKER_INSTALL=0
 }
 
-echo -e "${INFO_LINE} It will install the lastest version KubeAdm, kubelet and kubectl from APT: https://apt.kubernetes.io/ or TDB ${END_LINE}"
+echo -e "${INFO_LINE} It will install the latest version KubeAdm, kubelet and kubectl.${END_LINE}"
+echo -e "${COLOR_LINE}"
+read -p "--> Do you want refer a version? [default: latest]: " K_VERSION
+echo -e "${END_LINE}"
 
 echo -e "${INFO_LINE} Turn off swap and remove from /etc/fstab ${END_LINE}"
 swapoff -a || echo -e "${WARN_LINE} Problem to turn off swap ${END_LINE}"
@@ -95,10 +99,21 @@ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 cat <<EOF | tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
-apt-get update ; apt-get install -y kubelet kubeadm kubectl
+
+if [ "${K_VARSION}" == "latest" ]; then
+    echo -e "${INFO_LINE} Installing the \"latest\" version ${END_LINE}"
+    apt-get update ; apt-get install -y kubelet kubeadm kubectl
+else
+    echo -e "${INFO_LINE} Installing the ${K_VERSION} version ${END_LINE}"
+    apt-get update
+    apt-get install -y \
+        "kubelet=${K_VERSION}-00" \
+        "kubeadm=${K_VERSION}-00" \
+        "kubectl=${K_VERSION}-00"
+fi
 echo
 
-echo -e "${INFO_LINE} ### The installation is done!${END_LINE}"
+echo -e "${INFO_LINE} The installation is ${COLOR_LINE}DONE!${END_LINE}"
 echo -e "${COLOR_LINE}Now you can initiate a kubernetes using kubeadm and a simple way to do that execute the follow command:"
 echo -e "~> ${END_LINE}kubeadm init"
 echo
