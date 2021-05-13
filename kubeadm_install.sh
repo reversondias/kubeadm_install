@@ -1,4 +1,8 @@
 #!/bin/bash
+
+source ./containerd.sh
+source ./docker.sh
+
 export END_LINE='\e[0m'
 export INFO_LINE='\e[1;32;47m[INFO]\e[0m\e[0;33m -'
 export COLOR_LINE='\e[1;33m'
@@ -13,124 +17,6 @@ if [ "${USER}" != "root" ]; then
     echo -e "${WARN_LINE}This script have to execute as a root to work! ${END_LINE}"
     exit 1
 fi
-
-install_docker(){
-echo -e "${INFO_LINE} Installing Docker. ${END_LINE}"
-apt-get update
-apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg-agent \
-    software-properties-common
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
-
-apt-get update
-apt-get install -y docker-ce docker-ce-cli containerd.io
-
-export CRI=0
-}
-
-install_containerd(){
-echo -e "${INFO_LINE} Installing ContainerD. ${END_LINE}"
-echo -e "${COLOR_LINE}"
-read -p "--> Do you want refer a version? eg: 1.5.0 [default: latest]: " CONTAINERD_VERSION
-echo -e "${END_LINE}"
-echo -e "${INFO_LINE} Preparing environment. ${END_LINE}"
-cat <<EOF | tee /etc/modules-load.d/containerd.conf
-overlay
-br_netfilter
-EOF
-echo
-
-modprobe overlay
-modprobe br_netfilter
-echo
-
-cat <<EOF | tee /etc/sysctl.d/99-kubernetes-cri.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-EOF
-echo
-
-sysctl --system
-apt-get update
-apt-get install -y \
-    jq wget tar
-echo -e "${INFO_LINE} Download ContainerD binary. ${END_LINE}"
-if [ "${CONTAINERD_VERSION:-"latest"}" == "latest" ]; then
-
-    export TAG_NAME=`curl -s \
-                      -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/containerd/containerd/releases | \
-                      jq '.[0] | if select ( .tag_name | contains("-rc.") ) then (.) else empty end | .tag_name'`
-    if [ ! -z ${TAG_NAME} ]; then
-        export RELEASE_INDEX=1
-    else
-        export RELEASE_INDEX=0
-    fi
-    export CONTAINERD_VERSION=`curl -s \
-                      -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/containerd/containerd/releases | \
-                      jq --arg RELEASE_INDEX $RELEASE_INDEX '.[$RELEASE_INDEX|tonumber].name' | awk {'print $2'} | sed -e 's/\"//g'`
-    export CONTAINERD_URL=`curl -s \
-                        -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/containerd/containerd/releases | \
-                        jq --arg RELEASE_INDEX $RELEASE_INDEX --arg CONTAINERD_VERSION $CONTAINERD_VERSION '.[$RELEASE_INDEX|tonumber].assets[] | if .name == "containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz" then(.) else empty end | .browser_download_url'`
-
-else
-    export CONTAINERD_URL=`curl -s \
-                            -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/containerd/containerd/releases | \
-                            jq --arg CONTAINERD_VERSION $CONTAINERD_VERSION '.[].assets[] | if .name == "containerd-"+$CONTAINERD_VERSION+"-linux-amd64.tar.gz" then(.) else empty end | .browser_download_url'`
-fi
-
-echo -e "${INFO_LINE} Install ContainerD version ${CONTAINERD_VERSION}. ${END_LINE}"
-wget -q ${CONTAINERD_URL} -o /tmp/containerd-v${CONTAINERD_VERSION}.tar.gz
-tar -xvf /tmp/containerd-v${CONTAINERD_VERSION}.tar.gz bin/containerd -C /bin/
-tar --strip-components 1 -C /bin/ -xvf /tmp/containerd-v${CONTAINERD_VERSION}.tar.gz bin/containerd 
-
-mkdir -p /etc/containerd
-containerd config default | sudo tee /etc/containerd/config.toml
-echo
-
-cat <<EOF | tee /lib/systemd/system/containerd.service
-[Unit]
-Description=containerd container runtime
-Documentation=https://containerd.io
-After=network.target local-fs.target
-
-[Service]
-ExecStartPre=-/sbin/modprobe overlay
-ExecStart=/usr/local/bin/containerd
-
-Type=notify
-Delegate=yes
-KillMode=process
-Restart=always
-RestartSec=5
-# Having non-zero Limit*s causes performance problems due to accounting overhead
-# in the kernel. We recommend using cgroups to do container-local accounting.
-LimitNPROC=infinity
-LimitCORE=infinity
-LimitNOFILE=infinity
-# Comment TasksMax if your systemd version does not supports it.
-# Only systemd 226 and above support this version.
-TasksMax=infinity
-OOMScoreAdjust=-999
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-
-systemctl enablle containerd
-systemctl restart containerd
-export CRI=0
-}
 
 echo -e "${INFO_LINE} It will install the latest version KubeAdm, kubelet and kubectl.${END_LINE}"
 echo -e "${COLOR_LINE}"
