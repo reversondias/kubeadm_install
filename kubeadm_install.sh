@@ -56,17 +56,7 @@ echo -e "${END_LINE}"
 
 case $OPT in
 d | D)
-
-export MSG_VERSION="${WARN_LINE}The Kubernetes with version gather than 1.19.0 doesn't support Docker as runtime. Choose to install ContainerD as a runtime.${END_LINE}"
-
-if [ "${K_VERSION:-"latest"}" == "latest"  ] ; then
-        echo -e ${MSG_VERSION}
-elif [ "`echo ${K_VERSION} | sed -e 's/\.//g'`" -ge "1200" ]; then
-        echo -e ${MSG_VERSION}
-else
-    install_docker
-fi
-
+install_docker
 ;;
 
 c | C)
@@ -80,6 +70,7 @@ install_docker
 ;;
 
 k | K)
+check_k8s_version_for_docker
 echo -e "${INFO_LINE} The docker install keep intact! ${END_LINE}"
 export CRI=0
 ;;
