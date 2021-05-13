@@ -57,12 +57,16 @@ echo -e "${END_LINE}"
 case $OPT in
 d | D)
 
-if [ `echo ${K_VERSION} | sed -e 's/\.//g'` -ge 1200 || ${K_VERSION} == "latest "]; then
-    echo -e "${WARN_LINE}The Kubernetes with version gather than 1.19.0 doesn't support Docker as runtime. Choose to install ContainerD as a runtime.${END_LINE}"
+export MSG_VERSION="${WARN_LINE}The Kubernetes with version gather than 1.19.0 doesn't support Docker as runtime. Choose to install ContainerD as a runtime.${END_LINE}"
 
+if [ "${K_VERSION:-"latest"}" == "latest"  ] ; then
+        echo -e ${MSG_VERSION}
+elif [ "`echo ${K_VERSION} | sed -e 's/\.//g'`" -ge "1200" ]; then
+        echo -e ${MSG_VERSION}
 else
     install_docker
 fi
+
 ;;
 
 c | C)
