@@ -54,6 +54,14 @@ export FILE_NAME="containerd-v${CONTAINERD_VERSION}-linux-amd64.tar.gz"
 wget -q `echo ${CONTAINERD_URL} | sed -e 's/\"//g'` -O /tmp/${FILE_NAME}
 tar --strip-components 1 -C /usr/local/bin/ -xvf /tmp/${FILE_NAME} bin/containerd 
 
+echo -e "${INFO_LINE} Download and Install runc binary. ${END_LINE}"
+export RUNC_URL=`curl -s \
+                -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/opencontainers/runc/releases | \
+                jq '.[0].assets[] | if .name == "runc.amd64" then(.) else empty end | .browser_download_url'`
+
+echo -e "${INFO_LINE} URL to download ${RUNC_URL}. ${END_LINE}"
+wget -q ${RUNC_URL} -O /usr/local/bin/runc
+
 mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
 echo
