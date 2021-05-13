@@ -61,6 +61,7 @@ export RUNC_URL=`curl -s \
 
 echo -e "${INFO_LINE} URL to download ${RUNC_URL}. ${END_LINE}"
 wget -q ${RUNC_URL} -O /usr/local/bin/runc
+chmod u+x /usr/local/bin/runc
 
 mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
