@@ -52,7 +52,7 @@ echo -e "${INFO_LINE} The URL from binary ${CONTAINERD_URL}. ${END_LINE}"
 echo -e "${INFO_LINE} Install ContainerD version ${CONTAINERD_VERSION}. ${END_LINE}"
 export FILE_NAME="containerd-v${CONTAINERD_VERSION}-linux-amd64.tar.gz"
 wget -q `echo ${CONTAINERD_URL} | sed -e 's/\"//g'` -O /tmp/${FILE_NAME}
-tar --strip-components 1 -C /usr/local/bin/ -xvf /tmp/${FILE_NAME} bin/containerd 
+tar --strip-components 1 -C /usr/local/bin/ -xvf /tmp/${FILE_NAME} 
 
 echo -e "${INFO_LINE} Download and Install runc binary. ${END_LINE}"
 export RUNC_URL=`curl -s \
@@ -62,6 +62,34 @@ export RUNC_URL=`curl -s \
 echo -e "${INFO_LINE} URL to download ${RUNC_URL}. ${END_LINE}"
 wget -q ${RUNC_URL} -O /usr/local/bin/runc
 chmod u+x /usr/local/bin/runc
+
+echo -e "${INFO_LINE} Download and Install CNI-plugins  binary. ${END_LINE}"
+export CNI_URL=`curl -s \
+                -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/containernetworking/plugins/releases | \
+                jq '.[0].assets[] | select( .name | test("cni-plugins-linux-amd64.*.tgz$") ) | .browser_download_url'`
+mkdir -p \
+  /etc/cni/net.d \
+  /opt/cni/bin 
+echo -e "${INFO_LINE} URL to download ${CNI_URL}. ${END_LINE}"
+wget -q ${CNI_URL} -O /tmp/cni_plugin.tgz
+tar -C /opt/cni/bin/ -xvf /tmp/cni_plugin.tgz
+cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
+{
+    "cniVersion": "0.4.0",
+    "name": "bridge",
+    "type": "bridge",
+    "bridge": "cnio0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [{"subnet": "10.0.0.0/8"}]
+        ],
+        "routes": [{"dst": "0.0.0.0/0"}]
+    }
+}
+EOF
 
 mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
