@@ -1,6 +1,6 @@
 install_docker(){
 check_k8s_version_for_docker
-if [ ${CRO} -eq 0 ]; then
+if [ ${CRI} -eq 0 ]; then
     echo -e "${INFO_LINE} Installing Docker. ${END_LINE}"
     apt-get update
     apt-get install -y \

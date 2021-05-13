@@ -64,15 +64,19 @@ install_containerd
 ;;
 
 r | R)
-echo -e "${INFO_LINE} Remove docker installed. ${END_LINE}"
-apt-get remove docker docker-engine docker.io containerd runc
-install_docker
+check_k8s_version_for_docker
+if [ ${CRI} -eq 0 ] ; then
+    echo -e "${INFO_LINE} Remove docker installed. ${END_LINE}"
+    apt-get remove docker docker-engine docker.io containerd runc
+    install_docker
+fi
 ;;
 
 k | K)
 check_k8s_version_for_docker
-echo -e "${INFO_LINE} The docker install keep intact! ${END_LINE}"
-export CRI=0
+if [ ${CRI} -eq 0 ] ; then
+    echo -e "${INFO_LINE} The docker install keep intact! ${END_LINE}"
+fi
 ;;
 
 *)
