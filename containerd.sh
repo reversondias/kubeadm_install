@@ -52,8 +52,7 @@ echo -e "${INFO_LINE} The URL from binary ${CONTAINERD_URL}. ${END_LINE}"
 echo -e "${INFO_LINE} Install ContainerD version ${CONTAINERD_VERSION}. ${END_LINE}"
 export FILE_NAME="containerd-v${CONTAINERD_VERSION}-linux-amd64.tar.gz"
 wget -q `echo ${CONTAINERD_URL} | sed -e 's/\"//g'` -O /tmp/${FILE_NAME}
-tar -xvf /tmp/${FILE_NAME} bin/containerd -C /bin/
-tar --strip-components 1 -C /bin/ -xvf /tmp/${FILE_NAME} bin/containerd 
+tar --strip-components 1 -C /usr/local/bin/ -xvf /tmp/${FILE_NAME} bin/containerd 
 
 mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
@@ -89,7 +88,7 @@ WantedBy=multi-user.target
 
 EOF
 
-systemctl enablle containerd
+systemctl enable containerd
 systemctl restart containerd
 export CRI=0
 }
