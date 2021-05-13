@@ -71,7 +71,7 @@ mkdir -p \
   /etc/cni/net.d \
   /opt/cni/bin 
 echo -e "${INFO_LINE} URL to download ${CNI_URL}. ${END_LINE}"
-wget -q ${CNI_URL} -O /tmp/cni_plugin.tgz
+wget -q `echo ${CNI_URL} | sed -e 's/\"//g'` -O /tmp/cni_plugin.tgz
 tar -C /opt/cni/bin/ -xvf /tmp/cni_plugin.tgz
 cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
 {
