@@ -60,7 +60,7 @@ export RUNC_URL=`curl -s \
                 jq '.[0].assets[] | if .name == "runc.amd64" then(.) else empty end | .browser_download_url'`
 
 echo -e "${INFO_LINE} URL to download ${RUNC_URL}. ${END_LINE}"
-wget -q ${RUNC_URL} -O /usr/local/bin/runc
+wget -q `echo ${RUNC_URL}  | sed -e 's/\"//g'` -O /usr/local/bin/runc
 chmod u+x /usr/local/bin/runc
 
 echo -e "${INFO_LINE} Download and Install CNI-plugins  binary. ${END_LINE}"
