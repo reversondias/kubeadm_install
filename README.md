@@ -3,6 +3,11 @@ Shell script to install kubeadm
 
 For now the script is working with Ubuntu 18.04.
 
+## Rutime Support
+This scrtpt install on of the follows runtimes:  
+- Docker
+- ContaicerD
+
 ## Running the script
 This script was written to running as a root. Because the intention is to use that in a non-production environment.  
 You can run using root user or using `sudo` command.
