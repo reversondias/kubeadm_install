@@ -10,7 +10,6 @@ export WARN_LINE='\e[5;31;47m[WARN]\e[0m\e[0;31m -'
 export OPT="I"
 export K_VERSION="latest"
 export CONTAINERD_VERSION="latest"
-export DOCKER_INSTALL=1
 export CRI=1
 
 if [ "${USER}" != "root" ]; then
@@ -72,7 +71,7 @@ install_docker
 
 k | K)
 echo -e "${INFO_LINE} The docker install keep intact! ${END_LINE}"
-export DOCKER_INSTALL=0
+export CRI=0
 ;;
 
 *)
