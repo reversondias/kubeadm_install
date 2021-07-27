@@ -25,3 +25,9 @@ If you are using a non-root user:
 sudo ./kubeadm_install.sh
 ```
 
+## Modification after choose the Kubernetes version
+Some requirements configuration most be made before the Kubernetes installation.  
+This script will be the follow modification after the Kubernets version was choosen:  
+ - Turn off swap and remove from _/etc/fstab _  
+ - Enable module br_netfilter and keep it on _/etc/modules-load.d/modules.conf_ file  
+ - Enables the kernel modules `net.bridge.bridge-nf-call-ip6tables` and `net.bridge.bridge-nf-call-iptables` using file _/etc/sysctl.d/k8s.conf_  

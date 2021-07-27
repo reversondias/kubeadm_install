@@ -18,6 +18,7 @@ if [ "${USER}" != "root" ]; then
 fi
 
 echo -e "${INFO_LINE} It will install the latest version KubeAdm, kubelet and kubectl.${END_LINE}"
+echo -e "${WARN_LINE} After the Kubernetes version selected some modification will be made. Check the README.md to know ${END_LINE}"
 echo -e "${COLOR_LINE}"
 read -p "--> Do you want refer a version? eg: 1.18.0 [default: latest]: " K_VERSION
 echo -e "${END_LINE}"
@@ -49,9 +50,10 @@ echo -e "${COLOR_LINE}###############################################
 #### THE SCRIPT CAN KEEP[k] CRI, INSTALL    ### 
 #### DOCKER[d] OR CONTAINERD[c],            ###
 #### REMOVE AND INSTALL[r] THE DOKCER       ###
+#### EXIT[e]                                ###
 ###############################################"
 while [ ${CRI} -eq 1 ]; do
-read -p "--> What do you want ? [k/d/c/r]: " OPT
+read -p "--> What do you want ? [k/d/c/r/e]: " OPT
 echo -e "${END_LINE}"
 
 case $OPT in
@@ -77,6 +79,11 @@ check_k8s_version_for_docker
 if [ ${CRI} -eq 0 ] ; then
     echo -e "${INFO_LINE} The docker install keep intact! ${END_LINE}"
 fi
+;;
+
+e | E)
+echo -e "${INFO_LINE} Stoped script! =) ${END_LINE}"
+exit 0
 ;;
 
 *)
