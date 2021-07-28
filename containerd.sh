@@ -77,10 +77,10 @@ mkdir -p \
 echo -e "${INFO_LINE} URL to download ${CNI_URL}. ${END_LINE}"
 wget -q `echo ${CNI_URL} | sed -e 's/\"//g'` -O /tmp/cni_plugin.tgz
 tar -C /opt/cni/bin/ -xvf /tmp/cni_plugin.tgz
-echo -e "${INFO_LINE} Configure CNI brdge conf file. ${END_LINE}"
+echo -e "${INFO_LINE} Configure CNI bridge conf file. ${END_LINE}"
 echo -e "${COLOR_LINE} The default installation will enable the bridge CNI plugin. ${END_LINE}"
 echo -e "${COLOR_LINE}"
-read -p "~> Indicate IP range to configure (it's related with pods IP). Use the CIDR denotation.[Default: 172.16.0.0/16]: " CNI_IP_RANGE
+read -p "~> Indicate an IP range to configure (it's related pods IP). Use the CIDR denotation.[Default: 172.16.0.0/16]: " CNI_IP_RANGE
 echo -e "${END_LINE}"
 cat <<EOF | sudo tee /etc/cni/net.d/99-bridge.conf
 {

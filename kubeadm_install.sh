@@ -2,6 +2,9 @@
 
 source ./containerd.sh
 source ./docker.sh
+source ./kubeadm_init.sh
+source ./install_calico.sh
+source ./install_weave.sh
 
 export END_LINE='\e[0m'
 export INFO_LINE='\e[1;32;47m[INFO]\e[0m\e[0;33m -'
@@ -87,7 +90,7 @@ exit 0
 ;;
 
 *)
-echo -e "${WARN_LINE} You selected one option that there is no exist!!! ${END_LINE}"
+echo -e "${WARN_LINE} You selected one option there is no exist!!! ${END_LINE}"
 ;;
 esac
 done
@@ -113,10 +116,42 @@ fi
 echo
 
 echo -e "${INFO_LINE} The installation is ${COLOR_LINE}DONE!${END_LINE}"
-echo -e "${COLOR_LINE}Now you can initiate a kubernetes using kubeadm and a simple way to do that execute the follow command:"
+echo -e "${COLOR_LINE}Now you can initiate a kubernetes cluster using kubeadm and a simple way to do that execute the follow command:"
 echo -e "~> ${END_LINE}kubeadm init"
 echo
 echo -e "${COLOR_LINE}If you want to ensure that the installation doesn't get some update accidentally running the below command: 
 ~> ${END_LINE}apt-mark hold kubelet kubeadm kubectl"
 echo
 
+echo -e "${COLOR_LINE}"
+read -p "~> Do you want inicialize the Kubernetes Kubeadm?[y/N] " K_OPT
+echo -e "${END_LINE}" 
+if [ "${K_OPT}" == "y" ] || [ "${K_OPT}" == "Y" ]; then
+    kubeadm_init
+fi 
+
+while [ `kubectl get pods --all-namespaces | grep "Pending" | wc -l` -gt 0 ]; do
+    echo -e "${COLOR_LINE}"
+    echo -e " Waiting all pod to be in Running status.."
+    echo -e "${END_LINE}"
+done
+
+echo -e "${COLOR_LINE}"
+read -p "~> Do you want install anyone CNI driver? Calico[c] or Weave[w]: " CNI_OPT
+echo -e "${END_LINE}" 
+
+while [ "${CNI_OPT}" != "0" ]; do
+    case $CNI_OPT in
+        c | C)
+        install_calico
+        export CNI_OPT=0
+        ;;
+        w | W)
+        install_weave
+        export CNI_OPT=0
+        ;;
+        *)
+        echo -e "${WARN_LINE} You selected one option that there is no exist!!! ${END_LINE}"
+        ;;
+    esac
+done
